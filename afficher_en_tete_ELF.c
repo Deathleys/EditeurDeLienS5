@@ -156,6 +156,17 @@ void afficher_taille_partie_section (Elf32_Ehdr *En_Tete) {
 	
 }
 
+void afficher_indice_entete_table_chaines (Elf32_Ehdr *En_Tete) {
+	
+	switch (En_Tete->e_shstrndx) {
+		
+		case SHN_UNDEF : printf("Table des chaines de caractères indéfinie") ; break ;
+		default : printf("Indice de l'en-tête de section de la tables des chaines de caractères : %d", En_Tete->e_shstrndx) ;
+		
+	}
+	
+}
+
 void afficher_entete (Elf32_Ehdr *En_Tete) {
 	
 	afficher_magic_number (En_Tete) ;
@@ -189,5 +200,7 @@ void afficher_entete (Elf32_Ehdr *En_Tete) {
 	afficher_nombre_sections (En_Tete) ;
 	printf("\n") ;
 	afficher_taille_partie_section (En_Tete) ;
+	printf("\n") ;
+	afficher_indice_entete_table_chaines (En_Tete) ;
 	
 }
