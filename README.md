@@ -6,8 +6,12 @@ en étapes, avec la programmation de plusieurs outils intermédiaires, permettan
 principales notions et de simplifier le découpage des tâches.
 
 
-# BLEUZE BAPTISTE
-# BOCHATON MATHIEU
-# DA SILVA REMI 
-# LAFONT ANTHONY
-# THISSE NOEMI
+BLEUZE BAPTISTE
+
+BOCHATON MATHIEU
+
+DA SILVA REMI 
+
+LAFONT ANTHONY
+
+THISSE NOEMI
