@@ -52,6 +52,8 @@ int est_fichier_ELF (char Magic_Number_ELF[TAILLE_MAGIC_NUMBER], Elf32_Ehdr *En_
 
 int main (int argc, char **argv) {
 
+	char Magic_Number_ELF[TAILLE_MAGIC_NUMBER] = {0x7f, 'E', 'L', 'F'} ;
+
 	if (argc == 2) {
 
 		FILE *f ;
@@ -60,7 +62,7 @@ int main (int argc, char **argv) {
 		
 		Elf32_Ehdr *En_Tete = lire_Entete_ELF (f) ;
 		
-		if (est_fichier_ELF(Magic_Number, En_Tete)) {
+		if (est_fichier_ELF(Magic_Number_ELF, En_Tete)) {
 	
 			afficher_entete (En_Tete) ;
 			

@@ -12,7 +12,7 @@ void afficher_magic_number (Elf32_Ehdr *En_Tete) {
 	
 	afficher_debut_magic_number(En_Tete) ;
 	
-	for (int i = EI_MAG3 ; i < EI_NIDENT ; i++)
+	for (int i = EI_MAG3 + 1 ; i < EI_NIDENT ; i++)
 		
 		printf("%x ", En_Tete->e_ident[i]) ; 
 		
