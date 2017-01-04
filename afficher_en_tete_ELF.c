@@ -98,7 +98,7 @@ void afficher_version_fichier2 (Elf32_Ehdr *En_Tete) {
 
 void afficher_adresse_entree (Elf32_Ehdr *En_Tete) {
 	
-	printf("Adresse d'entrée : 0x%x", En_Tete->e_entry) ;
+	printf("Adresse de la 1ère entrée : 0x%x", En_Tete->e_entry) ;
 	
 }
 
@@ -110,7 +110,7 @@ void afficher_offset_entete_programme (Elf32_Ehdr *En_Tete) {
 
 void afficher_offset_entete_sections (Elf32_Ehdr *En_Tete) {
 	
-	printf("Offset de l'en-tête des sections : %d", En_Tete->e_shoff) ;
+	printf("Offset des en-têtes de section : %d", En_Tete->e_shoff) ;
 	
 }
 
@@ -120,34 +120,33 @@ void afficher_fanions (Elf32_Ehdr *En_Tete) {
 	
 }
 
-
 void afficher_taille_entete (Elf32_Ehdr *En_Tete) {
 	
-	printf("Taille de l'en-tête : %d octet(s)", En_Tete->e_ehsize) ;
+	printf("Taille de l'en-tête du fichier ELF : %d octet(s)", En_Tete->e_ehsize) ;
 	
 }
 
 void afficher_taille_entrees (Elf32_Ehdr *En_Tete) {
 	
-	printf("Taille des entrées : %d octet(s)", En_Tete->e_phentsize) ;
+	printf("Taille des entrées de l'en-tête du programme : %d octet(s)", En_Tete->e_phentsize) ;
 	
 }
 
 void afficher_nombre_entrees (Elf32_Ehdr *En_Tete) {
 	
-	printf("Nombre d'entrées de l'en-tête : %d", En_Tete->e_phnum) ;
+	printf("Nombre d'entrées de l'en-tête du programme : %d", En_Tete->e_phnum) ;
 	
 }
 
 void afficher_taille_sections (Elf32_Ehdr *En_Tete) {
 	
-	printf("Taille des sections : %d octet(s)", En_Tete->e_shentsize) ;
+	printf("Taille d'une en-tête de section : %d octet(s)", En_Tete->e_shentsize) ;
 	
 }
 
 void afficher_nombre_sections (Elf32_Ehdr *En_Tete) {
 	
-	printf("Nombre d'entrées de la partie section : %d", En_Tete->e_shnum) ;
+	printf("Nombre de sections : %d", En_Tete->e_shnum) ;
 	
 }
 
@@ -171,11 +170,15 @@ void afficher_entete (Elf32_Ehdr *En_Tete) {
 	printf("\n") ;
 	afficher_architecture (En_Tete) ;
 	printf("\n") ;
+	afficher_fanions (En_Tete) ;
+	printf("\n") ;
+	afficher_taille_entete (En_Tete) ;
+	printf("\n") ;
 	afficher_adresse_entree (En_Tete) ;
 	printf("\n") ;
-	afficher_offset_entete_sections (En_Tete) ;
+	afficher_offset_entete_programme (En_Tete) ;
 	printf("\n") ;
-	afficher_fanions (En_Tete) ;
+	afficher_offset_entete_sections (En_Tete) ;
 	printf("\n") ;
 	afficher_taille_entrees (En_Tete) ;
 	printf("\n") ;
