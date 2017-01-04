@@ -84,6 +84,7 @@ void afficher_architecture (Elf32_Ehdr *En_Tete) {
 		case EM_88K : printf("Motorola 88000") ; break ;
 		case EM_860 : printf("Intel 80860") ; break ;
 		case EM_MIPS : printf("MIPS RS3000") ; break ;
+		case EM_ARM : printf("ARM") ; break ;
 		default : printf("Non répertoriée") ;
 		
 	}

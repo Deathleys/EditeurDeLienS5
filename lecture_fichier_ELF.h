@@ -1,10 +1,18 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <elf.h>
+#ifndef LECTURE_FICHIER_ELF_H
+#define LECTURE_FICHIER_ELF_H
+
+#include "type.h"
 #include "afficher_en_tete_ELF.h"
-#include "util.h"
+#include "afficher_sections_ELF.h"
 
-#define TAILLE_MAGIC_NUMBER 4
+void afficher_type_fichier (Elf32_Ehdr *En_Tete) ;
 
-char Magic_Number[TAILLE_MAGIC_NUMBER] = {0x7f, 'E', 'L', 'F'} ;
+Elf32_Ehdr * lire_Entete_ELF (FILE *f) ;
+
+Elf32_Phdr * lire_Entete_Programme (Elf32_Ehdr *En_Tete, FILE *f) ;
+
+void lire_Entetes_Sections (data_ELF Entetes_Sections, FILE *f) ;
+
+int est_fichier_ELF (char Magic_Number_ELF[TAILLE_MAGIC_NUMBER], Elf32_Ehdr *En_Tete) ;
+	
+#endif

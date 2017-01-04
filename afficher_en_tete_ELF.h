@@ -1,8 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <elf.h>
-#include "util.h"
-#define MODE_BIG_ENDIAN 2
+#ifndef AFFICHER_ENTETE_ELF_H
+#define AFFICHER_ENTETE_ELF_H
+
+#include "type.h"
 
 void afficher_magic_number (Elf32_Ehdr *En_Tete) ;
 
@@ -39,3 +38,5 @@ void afficher_nombre_sections (Elf32_Ehdr *En_Tete) ;
 void afficher_taille_partie_section (Elf32_Ehdr *En_Tete) ;
 
 void afficher_entete (Elf32_Ehdr *En_Tete) ;
+
+#endif
