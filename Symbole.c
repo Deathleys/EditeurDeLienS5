@@ -1,9 +1,30 @@
-void afficher_association_objet (Elf32_Sym *symbole) {
+void afficher_nom(Elf32_Sym *symbole) {
+	switch (symbole->st_name) {
+		case STN_UNDEF : printf(); break ; // A vérifier.
+		
+		default : printf("%i";symbole->st_shndx) ;
+		
+	}
+}
+
+void afficher_ndx(Elf32_Sym *symbole) {
+
+	printf("Relation section : ") ;
+
+	switch (symbole->st_shndx) {
 	
-	//Vérifier ELF32_ST_TYPE()
+		
+		default : printf("%i";symbole->st_shndx) ;
+		
+	}
+}
+
+void afficher_type(Elf32_Sym *symbole) {
+	
+	//Vérifier ELF32_ST_TYPE(), besoin pour récolter info.
 
 	printf("Type de symbole et de liaison : ") ;
-	
+
 	switch ( ELF32_ST_TYPE(symbole->st_info) {
 	
 		case STT_NOTYPE : printf("Indéfini") ; break ;
@@ -50,7 +71,7 @@ void afficher_taille (Elf32_Sym *symbole) {
 	
 }
 
-void afficher_association_objet (Elf32_Sym *symbole) {
+void afficher_visibilite(Elf32_Sym *symbole) {
 	
 	//Vérifier ELF32_ST_TYPE()
 
@@ -62,6 +83,26 @@ void afficher_association_objet (Elf32_Sym *symbole) {
 		case STV_HIDDEN : printf("Non valable dans d'autres modules") ; break ;
 		case STV_PROTECTED  : printf("Préemptible ou non exporté") ; break ;
 		default : printf("Spécifique au Processeur") ;
+		
+	}
+	
+}
+
+void afficher_table_symbole (donnee_ELF ELF) {
+	int i ;
+	printf("Num\tValeur\tTail\tType\tLien\tVis\tNdx\tNom\n");	
+    		
+    for (i = 0 ; i < ELF->lts ; i++) {
+
+		printf("[%i]:\t", i);
+		afficher_valeur (ELF->Tables_Symbole) ;
+		afficher_taille (ELF->Tables_Symbole) ;
+		afficher_type (ELF->Tables_Symbole);
+		afficher_portee_symbole (ELF->Tables_Symbole);
+		afficher_visibilite(ELF->Tables_Symbole) ;
+		afficher_ndx(ELF->Tables_Symbole);
+		afficher_nom(ELF->Tables_Symbole);
+		printf("\n");
 		
 	}
 	
