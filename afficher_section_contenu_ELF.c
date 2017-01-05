@@ -65,35 +65,47 @@ char* getTableNoms(FILE* f, Elf32_Ehdr* En_Tete_ELF) {
     	return str;
 }
 
-char* getName(char* tableNoms, )
-
-int getIndex(int nbSections, char* tableNoms, char* nomSection){
-	int i = 0;
+void get_nom_section(char* str, Elf32_Shdr* En_Tete_Section, char* nom) {
 	int i = En_Tete_Section->sh_name;
-        while (str[i] != '\0') {
-            printf("%c", str[i]);
-            i++;
-        }
-	while (i < nbSections && strcmp((char*)tableNoms[i], nomSection) != 0){
-		i++;
-	}
-	if (i < nbSections){
-		return i;
-	} else{
-		return 0;
-	}
+	strcpy(nom,&str[i]);
 }
 
-char* getContenuSection(int indexSection, Elf32_Ehdr* En_Tete_ELF, FILE* f){
+
+int getIndexByName(FILE* f, Elf32_Ehdr* En_Tete_ELF, char *tableNoms, char* nomSection){
+	int nbSections = En_Tete_ELF->e_shnum;
+	Elf32_Shdr* shdr = malloc(sizeof (Elf32_Shdr));
+	//création de la table des sections
+	for (int i = 0; i < nbSections; i++) {
+		char shdr_name[100]={""};
+		shdr = lire_Entete_Section(f, i, En_Tete_ELF);
+		get_nom_section(tableNoms, shdr, shdr_name);
+		if(strcmp(nomSection, shdr_name) == 0) return i;
+	}
+	return 0;
+        
+}
+
+unsigned char* getContenuSection(int indexSection, Elf32_Ehdr* En_Tete_ELF, FILE* f){
 	Elf32_Shdr* shdr = lire_Entete_Section(f, indexSection, En_Tete_ELF);
 	fseek(f, shdr->sh_offset, SEEK_SET);
-	char* contenu = malloc(shdr->sh_size);
+	unsigned char* contenu = malloc(sizeof (unsigned char)*shdr->sh_size);
 	fread(contenu, shdr->sh_size, 1, f);
+	for (int i = 0; i < shdr->sh_size; i++) {
+		fread(contenu, 1, 1, f);
+	}
+	/*for (int i = 0; i < shdr->sh_size; i=i+4) {
+		printf("%02x%02x%02x%02x\n", contenu[i], contenu[i+1], contenu[i+2],contenu[i+3]);
+	}
+	for (int i = 1; i <= shdr->sh_size; i++) {
+		printf("%02x", contenu[i]);
+		if(i%4==0)printf(" ");		
+	}
+	printf("\n");*/
 	return contenu;
 }
 
-void afficherContenuSection(char* contenu){
-	printf("%s", contenu);
+void afficherContenuSection(unsigned char* contenu){
+	//TODO utiliser affichage hexa
 }
 
 int main (int argc, char **argv) {
@@ -103,23 +115,20 @@ int main (int argc, char **argv) {
 
 		//récupération de l'entete du fichier ELF
 		Elf32_Ehdr* En_Tete_ELF = lire_Entete_ELF (f) ;
-		
-		//récupération de l'entete des sections
-		int nbSections = En_Tete_ELF->e_shnum;
 
     		char* tableNoms = getTableNoms(f,En_Tete_ELF);
     		
 		//test si l'argument est le nom ou l'indice de la section
-    		if(atoi(argv[2])>0 && atoi(argv[2])<nbSections) {
+    		if(atoi(argv[2])>0 && atoi(argv[2])<En_Tete_ELF->e_shnum) {
     			indexSection = atoi(argv[2]);
     		} else {
-    			indexSection = getIndex(nbSections, tableNoms, argv[2]);
+    			indexSection = getIndexByName(f, En_Tete_ELF, tableNoms, argv[2]);
     		}
     		
     		if (indexSection == 0){
     			printf("La section n'a pas de données à être vidangé.");
     		} else{
-    			char* contenuSection = getContenuSection(indexSection, En_Tete_ELF, f);
+    			unsigned char* contenuSection = getContenuSection(indexSection, En_Tete_ELF, f);
     			afficherContenuSection(contenuSection);
     		}
     		
