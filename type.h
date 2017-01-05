@@ -16,11 +16,13 @@ typedef struct donnees_ELF {
 	Elf32_Ehdr *Entete_ELF ;
 	Elf32_Phdr *Entete_Programme ;
 	Elf32_Shdr **Entetes_Sections ;
-	int les ;
+	Elf32_Sym  *Table_Symboles ;
 	int ind_etstrtab ;
 	int ind_etsymtab ;
-	char unsigned *text ;
-	int ltext ;
+	int les ;
+	int lTexte ;
+	char *Table_Chaines ;
+	char *Texte ;
 	
 } *donnees_ELF ;
 

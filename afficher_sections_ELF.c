@@ -84,16 +84,6 @@ void afficher_legende_flags() {
 
 }
 
-char* getTableNoms(donnees_ELF ELF, FILE *f) {
-    	Elf32_Shdr *StringTable = ELF->Entetes_Sections[ELF->ind_etstrtab] ;
-    	fseek(f, StringTable->sh_offset, SEEK_SET);
-    	char* str = malloc(StringTable->sh_size);
-    	for (int index = 0; index < StringTable->sh_size; index++) {
-        	str[index] = fgetc(f);
-    	}
-    	return str;
-}
-
 void afficher_nom_section(char* str, Elf32_Shdr* Entete_Section) { 
 	int i = Entete_Section->sh_name;
         while (str[i] != '\0') {
@@ -106,8 +96,6 @@ void afficher_nom_section(char* str, Elf32_Shdr* Entete_Section) {
 void afficher_entetes_sections (donnees_ELF ELF) {
 
 	int i ;
-	
-	//char* tableNoms = getTableNoms(ELF);
 
 	printf("[Nr]\tTaille\tType\t\tInfo\tPerm.\tDecal.\tNom\n");	
     		
@@ -119,7 +107,7 @@ void afficher_entetes_sections (donnees_ELF ELF) {
 		afficher_info_section(ELF->Entetes_Sections[i]);
 		afficher_flags_section(ELF->Entetes_Sections[i]);
 		afficher_decalage_section(ELF->Entetes_Sections[i]);
-		//afficher_nom_section(tableNoms, Entetes_Sections->Entete[i]);
+		afficher_nom_section(ELF->Table_Chaines, ELF->Entetes_Sections[i]);
 		printf("\n");
 		
 	}
