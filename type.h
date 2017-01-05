@@ -11,13 +11,17 @@
 #define MODE_BIG_ENDIAN 2
 #define CLASSE_32BITS 1
 
-typedef struct data_ELF {
+typedef struct donnees_ELF {
 	
-	Elf32_Shdr **Entete ;
-	int l ;
+	Elf32_Ehdr *Entete_ELF ;
+	Elf32_Phdr *Entete_Programme ;
+	Elf32_Shdr **Entetes_Sections ;
+	int les ;
 	int ind_etstrtab ;
 	int ind_etsymtab ;
+	char unsigned *text ;
+	int ltext ;
 	
-} *data_ELF ;
+} *donnees_ELF ;
 
 #endif
