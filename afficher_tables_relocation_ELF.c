@@ -24,8 +24,7 @@ Elf32_Rel* lireRelocationsDeSection(FILE* f, int numSec, donnees_ELF ELF) {
     return rs;
 }
 */
-char *getTypeRelocation(Elf32_Word r_info){
-	char *typeRelocation[] = 
+char *typeRelocation[] = 
 	{ 
 		"R_ARM_NONE",
 		"R_ARM_PC24",
@@ -79,9 +78,59 @@ char *getTypeRelocation(Elf32_Word r_info){
 		"R_ARM_THM_MOVW_PREL_NC",
 		"R_ARM_THM_MOVT_PREL"
 	};
+
+char *getTypeRelocation(Elf32_Word r_info){
 	return (char *)(typeRelocation[ELF32_R_TYPE(r_info)]);
 }
+/*
+Elf32_Addr getSymboleValue(donnees_ELF ELF, Elf32_Word r_info){
+	int index = (int) ELF32_R_SYM(r_info);
+	
+	for (int i = 0 ; i < ELF->lts ; i++) {
+		if (ELF->Table_Symboles[i].st_name == index){
+			return ELF->Table_Symboles[i]->st_value;
+		}
+	}
+	return NULL;
+}*/
 
+/*
+Elf32_Sym *getSymbole(donnees_ELF ELF, Elf32_Word r_info){
+	int index =0;
+	if(ELF32_R_SYM(r_info) != SHN_UNDEF )
+		index = (int) ELF32_R_SYM(r_info);
+	for (int i = 0 ; i < ELF->lts ; i++) {
+		if (ELF->Table_Symboles[i]->st_name == index){
+			return ELF->Table_Symboles[i];
+		}
+	}
+	return NULL;
+}
+
+Elf32_Word getSymboleValue(Elf32_Sym *symbole){
+	
+	if(symbole != NULL)
+		return symbole->st_value;
+	else
+		return 0;
+}
+
+void REafficher_nom_symbole(unsigned char* table, Elf32_Sym *symbole) { 
+	
+	if(symbole != NULL){
+		int i = symbole->st_name;
+		if(i!=0){
+	       	while (table[i] != '\0') { 
+		   	printf("%c", table[i]);
+		   	i++;
+		       }	
+		}
+	}
+	else 
+		printf("TODO");
+	
+}
+*/
 void afficher_tables_relocation(FILE* f, donnees_ELF ELF) {
 
     for (int k = 0; k < ELF->lsr; k++) {
@@ -93,9 +142,16 @@ void afficher_tables_relocation(FILE* f, donnees_ELF ELF) {
             i++;
         }
         printf("' à l'adresse de décalage 0x%x contient %d entrees:\n", ELF->Entetes_Sections[ELF->indiceRelocations[k]]->sh_offset, nbRel);
-        printf("Décalage\tInfo\t\tType\t\tSym_idx\n");
+        printf("Décalage\tInfo\t\tType\t\tind symb\n");
         for (int j = 0; j < nbRel; j++) {
-            printf("%08x\t%08x\t%s\t%08x\n", ELF->Table_Relocation[k][j].r_offset, ELF->Table_Relocation[k][j].r_info, getTypeRelocation(ELF->Table_Relocation[k][j].r_info),ELF32_R_SYM(ELF->Table_Relocation[k][j].r_info));
+	    printf("%08x\t%08x\t%s\t%08u\t",
+		ELF->Table_Relocation[k][j].r_offset,
+		ELF->Table_Relocation[k][j].r_info,
+		getTypeRelocation(ELF->Table_Relocation[k][j].r_info),
+		ELF32_R_SYM(ELF->Table_Relocation[k][j].r_info)
+	    );
+	    //REafficher_nom_symbole(ELF->Table_Chaines,getSymbole(ELF,ELF->Table_Relocation[k][j].r_info));
+	    printf("\n");
         }
         printf("\n");
     }
