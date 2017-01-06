@@ -1,50 +1,22 @@
 #include "lecture_fichier_ELF.h"
 
-void afficher_type_fichier (Elf32_Ehdr *Entete) {
+
+void lire_Entete_ELF (donnees_ELF ELF, FILE *f) {
 	
-	char type[4] ; int i ;
+	Elf32_Ehdr *Entete_ELF = malloc (sizeof * Entete_ELF) ;
 	
-	for (i = EI_MAG1 ; i <= EI_MAG3 ; i	++) type[i-1] = Entete->e_ident[i] ;
-	type[i] = 0 ;
+	fread(Entete_ELF, sizeof * Entete_ELF, 1, f) ;
 	
-	printf("Type du fichier : %s", type) ;
-	
+	ELF->Entete_ELF = Entete_ELF ;
 }
 
-
-
-Elf32_Ehdr * lire_Entete_ELF (FILE *f) {
-	
-	Elf32_Ehdr *Entete = malloc (sizeof *Entete) ;
-	
-	fread(Entete, sizeof (Elf32_Ehdr), 1, f) ;
-	
-	if ((! is_big_endian () && Entete->e_ident[EI_DATA] == MODE_BIG_ENDIAN) || (is_big_endian() && Entete->e_ident[EI_DATA] == MODE_BIG_ENDIAN)) {
-		
-		Entete->e_type = reverse_2(Entete->e_type);
-		Entete->e_machine = reverse_2(Entete->e_machine);
-		Entete->e_version = reverse_4(Entete->e_version);
-	 	Entete->e_entry = reverse_4(Entete->e_entry);
-		Entete->e_phoff = reverse_4(Entete->e_phoff);
-		Entete->e_shoff = reverse_4(Entete->e_shoff);
-		Entete->e_flags = reverse_4(Entete->e_flags);
-		Entete->e_ehsize = reverse_2(Entete->e_ehsize);
-		Entete->e_phentsize = reverse_2(Entete->e_phentsize);
-		Entete->e_phnum = reverse_2(Entete->e_phnum);
-		Entete->e_shentsize = reverse_2(Entete->e_shentsize);
-		Entete->e_shnum = reverse_2(Entete->e_shnum);
-		Entete->e_shstrndx = reverse_2(Entete->e_shstrndx);
-	    
-	}
-	
-	return Entete ;
-}
-
-Elf32_Phdr * lire_Entete_Programme (Elf32_Ehdr *Entete_ELF, FILE *f) {
+void lire_Entete_Programme (donnees_ELF ELF, FILE *f) {
 
 	Elf32_Phdr *Entete_Programme = NULL ;
+	
+	fseek(f, ELF->Entete_ELF->e_phoff, SEEK_SET);
 
-	if (Entete_ELF->e_phnum) {
+	if (ELF->Entete_ELF->e_phnum) {
 		
 		Entete_Programme = malloc (sizeof *Entete_Programme) ;
 	
@@ -52,15 +24,15 @@ Elf32_Phdr * lire_Entete_Programme (Elf32_Ehdr *Entete_ELF, FILE *f) {
 		
 	}
 	
-	return Entete_Programme ;
+	ELF->Entete_Programme = Entete_Programme ;
 	
 }
 
-void lire_Texte (donnees_ELF ELF, FILE *f) {
+/*void lire_Texte (donnees_ELF ELF, FILE *f) {
 
 	ELF->lTexte = ELF->Entete_ELF->e_shoff - ELF->Entete_ELF->e_ehsize - ELF->Entete_ELF->e_phnum * ELF->Entete_ELF->e_phentsize ;
 
-	char * Texte = malloc (ELF->lTexte) ;
+	unsigned char * Texte = malloc (ELF->lTexte) ;
 	
 	for (int i = 0 ; i < ELF->lTexte ; i++) {
 	
@@ -100,55 +72,126 @@ void afficher_Texte (donnees_ELF ELF) {
 		
 	}
 		
+}*/
+
+void lire_Table_Symboles (donnees_ELF ELF, FILE *f) {
+	
+	ELF->Table_Symboles = malloc (sizeof * (ELF->Table_Symboles) * ELF->lts) ;
+	
+	fseek(f, ELF->Entetes_Sections[ELF->ind_etsymtab]->sh_offset, SEEK_SET);
+	
+	for (int i = 0 ; i < ELF->lts ; i++) {
+		
+		Elf32_Sym * Symbole = malloc (sizeof *Symbole) ;
+	
+		fread(Symbole, sizeof (Elf32_Sym), 1, f) ;
+		
+		ELF->Table_Symboles[i] = Symbole ;
+	
+	}
+	
+}
+
+void lire_Table_Chaines_ES (donnees_ELF ELF, FILE *f) {
+	
+	Elf32_Shdr *Entete_Table_Chaines_ES = ELF->Entetes_Sections[ELF->ind_etstrtabes] ;
+    
+    fseek(f, Entete_Table_Chaines_ES->sh_offset, SEEK_SET);
+    
+    unsigned char * Table_Chaines_ES = malloc (Entete_Table_Chaines_ES->sh_size);
+    
+    for (int i = 0; i < Entete_Table_Chaines_ES->sh_size; i++) {
+       
+       Table_Chaines_ES [i] = fgetc(f);
+    
+    }
+    
+  	ELF->Table_Chaines_ES = Table_Chaines_ES ;
+	
+}
+
+void lire_Table_Chaines (donnees_ELF ELF, FILE *f) {
+	
+	Elf32_Shdr *Entete_Table_Chaines = ELF->Entetes_Sections[ELF->ind_etstrtab] ;
+    
+    fseek(f, Entete_Table_Chaines->sh_offset, SEEK_SET);
+    
+    unsigned char * Table_Chaines = malloc (Entete_Table_Chaines->sh_size);
+    
+    for (int i = 0 ; i < Entete_Table_Chaines->sh_size; i++) {
+       
+       Table_Chaines [i] = fgetc(f);
+    
+    }
+    
+   ELF->Table_Chaines = Table_Chaines ;
+	
 }
 
 void lire_Entetes_Sections (donnees_ELF ELF, FILE *f) {
 
+	int i ; long int save_pos ;
+
 	ELF->Entetes_Sections = malloc (sizeof (Elf32_Shdr) * ELF->les) ;
 	
-	for (int i = 0 ; i < ELF->les ; i++) {
+	fseek(f, ELF->Entete_ELF->e_shoff, SEEK_SET) ;
+	
+	for (i = 0 ; i < ELF->les ; i++) {
 	
 		Elf32_Shdr *Entete_Section = malloc (sizeof *Entete_Section) ;
 	
 		fread(Entete_Section, sizeof (Elf32_Shdr), 1, f) ;
 		
-		if (Entete_Section->sh_type == SHT_SYMTAB)
-			
-			ELF->ind_etsymtab = i ; 
-		
 		ELF->Entetes_Sections[i] = Entete_Section ;
+		
+		
+		if (i == ELF->ind_etstrtabes) {
+		
+			save_pos = ftell(f) ;
+			lire_Table_Chaines_ES (ELF, f) ;
+			fseek(f, save_pos, SEEK_SET) ;
+			
+		}
+		
+		else if (Entete_Section->sh_type == SHT_STRTAB) {
+		
+			save_pos = ftell(f) ;
+			ELF->ind_etstrtab = i ;
+			lire_Table_Chaines (ELF, f) ;
+			fseek(f, save_pos, SEEK_SET) ;
+			
+			
+		}
+		
+		else if (Entete_Section->sh_type == SHT_SYMTAB) {
+		
+			save_pos = ftell(f) ;
+			ELF->ind_etsymtab = i ;
+			ELF->lts = ELF->Entetes_Sections[ELF->ind_etsymtab]->sh_size / ELF->Entetes_Sections[ELF->ind_etsymtab]->sh_entsize ;
+			lire_Table_Symboles (ELF, f) ;
+			fseek(f, save_pos, SEEK_SET) ;
+			
+		}
 		
 	}
 	
 }
 
-Elf32_Sym * lire_Table_Symboles (donnees_ELF ELF, FILE *f) {
+
+
+void afficher_noms_symboles (donnees_ELF ELF) {
+
+	for (int i = 0 ; i < ELF->lts ; i++) {
 	
-	Elf32_Sym *Table_Symboles = malloc (sizeof *Table_Symboles) ;
+		printf("%s\n" , ELF->Table_Chaines + ELF->Table_Symboles[i]->st_name) ;
 	
-	fread(Table_Symboles, sizeof (Elf32_Sym), 1, f) ;
-	
-	return Table_Symboles ;
+	}
 	
 }
 
-char * lire_Table_Chaines (donnees_ELF ELF, FILE *f) {
-	
-	Elf32_Shdr *StringTable = ELF->Entetes_Sections[ELF->ind_etstrtab] ;
-    
-    fseek(f, StringTable->sh_offset, SEEK_SET);
-    
-    char* str = malloc(StringTable->sh_size);
-    
-    for (int index = 0; index < StringTable->sh_size; index++) {
-        str[index] = fgetc(f);
-    }
-    
-    return str;
-	
-}
 
-int est_fichier_ELF (char Magic_Number_ELF[TAILLE_MAGIC_NUMBER], Elf32_Ehdr *Entete) {
+
+int est_fichier_ELF (unsigned char Magic_Number_ELF[TAILLE_MAGIC_NUMBER], Elf32_Ehdr *Entete) {
 
 	int i, b = 1 ;
 	
@@ -173,53 +216,69 @@ void liberer_struct_ELF (donnees_ELF *ELF) {
 	}
 			
 	free ((*ELF)->Entetes_Sections) ;
+	
+	for (int i = 0 ; i < (*ELF)->lts ; i++) {
+		
+		free((*ELF)->Table_Symboles[i]) ;
+		
+	}
+	
 	free ((*ELF)->Table_Symboles) ;
-	free ((*ELF)->Texte) ;
+	free ((*ELF)->Table_Chaines_ES) ;
 	free ((*ELF)->Table_Chaines) ;
 	free (*ELF) ;
+	
 	*ELF = NULL ;
 	
 }
 
 int main (int argc, char **argv) {
 
-	char Magic_Number_ELF[TAILLE_MAGIC_NUMBER] = {0x7f, 'E', 'L', 'F'} ;
+	unsigned char Magic_Number_ELF[TAILLE_MAGIC_NUMBER] = {0x7f, 'E', 'L', 'F'} ;
 
-	if (argc == 2) {
+	if (argc >= 2) {
 
 		FILE *f ;
 	
 		f = fopen(argv[1], "r") ;
 		
+		if (!f) {
+			
+			fprintf(stderr, "Le fichier %s n'existe pas", argv [1]) ;
+			exit (1) ;
+			
+		}
+		
 		donnees_ELF ELF = malloc (sizeof *ELF) ;
 		
-		ELF->Entete_ELF = lire_Entete_ELF (f) ;
+		lire_Entete_ELF (ELF, f) ;
+		
+		
+		//if ((! is_big_endian () && ELF->Entete_ELF->e_ident[EI_DATA] == MODE_BIG_ENDIAN) || (is_big_endian() && ELF->Entete_ELF->e_ident[EI_DATA] == MODE_BIG_ENDIAN)) {
+			
+			
 		
 		if (est_fichier_ELF(Magic_Number_ELF, ELF->Entete_ELF) && ELF->Entete_ELF->e_ident[EI_CLASS] == CLASSE_32BITS) {
 		
-			ELF->Entete_Programme = lire_Entete_Programme (ELF->Entete_ELF, f) ;
+			lire_Entete_Programme (ELF, f) ;
 			
-			ELF->ind_etstrtab = ELF->Entete_ELF->e_shstrndx ;
+			ELF->ind_etstrtabes = ELF->Entete_ELF->e_shstrndx ;
 			
 			ELF->les = ELF->Entete_ELF->e_shnum ;
 			
-			lire_Texte (ELF,f) ;
-			
 			lire_Entetes_Sections (ELF, f) ;
 			
-			ELF->Table_Symboles = lire_Table_Symboles (ELF, f) ;
-			
-			ELF->Table_Chaines = lire_Table_Chaines (ELF, f) ;
+			afficher_noms_symboles (ELF) ;
 	
 			afficher_entete (ELF->Entete_ELF) ;
 			
-			printf("\n\n") ;
-			
-			afficher_Texte(ELF) ;
-			
-			printf("\n") ;
-			
 			afficher_entetes_sections (ELF) ;
+			
+			if (argc == 3) {
+			
+				//afficher_contenu_sections (ELF, f, argv[2]) ;
+				
+			}
 			
 			liberer_struct_ELF (&ELF) ;
 			
