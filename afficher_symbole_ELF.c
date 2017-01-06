@@ -111,7 +111,7 @@ void afficher_table_symbole (donnee_ELF ELF) {
 		afficher_portee_symbole_symbole (ELF->Tables_Symbole);printf("\t");
 		afficher_visibilite_symbole(ELF->Tables_Symbole) ;printf("\t");
 		afficher_ndx_symbole(ELF->Tables_Symbole);printf("\t");
-		afficher_nom_symbole(ELF->Table_Chaines,ELF->Tables_Symbole);
+		afficher_nom_symbole(ELF->Table_Chaines,ELF->Tables_Symbole); // Changer tables_chaines pour prendre la table des symboles.
 		printf("\n");
 		
 	}
