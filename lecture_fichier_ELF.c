@@ -28,55 +28,27 @@ void lire_Entete_Programme (donnees_ELF ELF, FILE *f) {
 	
 }
 
-/*void lire_Texte (donnees_ELF ELF, FILE *f) {
-
-	ELF->lTexte = ELF->Entete_ELF->e_shoff - ELF->Entete_ELF->e_ehsize - ELF->Entete_ELF->e_phnum * ELF->Entete_ELF->e_phentsize ;
-
-	unsigned char * Texte = malloc (ELF->lTexte) ;
+void lire_Section (donnees_ELF ELF, int ind_section, FILE *f) {
 	
-	for (int i = 0 ; i < ELF->lTexte ; i++) {
-	
-		Texte[i] = fgetc(f) ;
-		
-	}
-	
-	ELF->Texte = Texte ;
+	Elf32_Shdr *Entete_Section = ELF->Entetes_Sections[ind_section] ;
+    
+    fseek(f, Entete_Section->sh_offset, SEEK_SET);
+    
+    unsigned char * Section = malloc (Entete_Section->sh_size);
+    
+    for (int i = 0; i < Entete_Section->sh_size; i++) {
+       
+       Section [i] = fgetc(f);
+    
+    }
+    
+  	ELF->Sections[ind_section] = (void *) Section ;
 	
 }
 
-void afficher_Texte (donnees_ELF ELF) {
-
-	int i = 0 ;
-	
-	while (i < ELF->lTexte) {
-	
-		printf("%.8x  ", i) ;
-	
-		for (int j = 0 ; i < ELF->lTexte && j < 8 ; j++) {
-		
-			printf("%.2x ", ELF->Texte[i]) ;
-			i++ ;
-			
-		}
-			
-		printf(" ") ;
-		
-		for (int j = 0 ; i < ELF->lTexte && j < 8 ; j++) {
-		
-			printf("%.2x ", ELF->Texte[i]) ;
-			i++ ;
-			
-		}
-		
-		printf("\n") ;
-		
-	}
-		
-}*/
-
 void lire_Table_Symboles (donnees_ELF ELF, FILE *f) {
 	
-	ELF->Table_Symboles = malloc (sizeof * (ELF->Table_Symboles) * ELF->lts) ;
+	ELF->Table_Symboles = malloc (sizeof (Elf32_Sym) * ELF->lts) ;
 	
 	fseek(f, ELF->Entetes_Sections[ELF->ind_etsymtab]->sh_offset, SEEK_SET);
 	
@@ -114,9 +86,9 @@ void lire_Table_Chaines (donnees_ELF ELF, FILE *f) {
 	
 	Elf32_Shdr *Entete_Table_Chaines = ELF->Entetes_Sections[ELF->ind_etstrtab] ;
     
-    fseek(f, Entete_Table_Chaines->sh_offset, SEEK_SET);
+    fseek(f, Entete_Table_Chaines->sh_offset, SEEK_SET) ;
     
-    unsigned char * Table_Chaines = malloc (Entete_Table_Chaines->sh_size);
+    unsigned char * Table_Chaines = malloc (Entete_Table_Chaines->sh_size) ;
     
     for (int i = 0 ; i < Entete_Table_Chaines->sh_size; i++) {
        
@@ -133,6 +105,7 @@ void lire_Entetes_Sections (donnees_ELF ELF, FILE *f) {
 	int i ; long int save_pos ;
 
 	ELF->Entetes_Sections = malloc (sizeof (Elf32_Shdr) * ELF->les) ;
+	ELF->Sections = malloc (sizeof (void *) * ELF->les) ;
 	
 	fseek(f, ELF->Entete_ELF->e_shoff, SEEK_SET) ;
 	
@@ -146,40 +119,51 @@ void lire_Entetes_Sections (donnees_ELF ELF, FILE *f) {
 		
 		
 		if (i == ELF->ind_etstrtabes) {
-		
+			
 			save_pos = ftell(f) ;
 			lire_Table_Chaines_ES (ELF, f) ;
 			fseek(f, save_pos, SEEK_SET) ;
+			ELF->Sections[i] = (void *) ELF->Table_Chaines_ES ;
 			
 		}
 		
 		else if (Entete_Section->sh_type == SHT_STRTAB) {
-		
+			
 			save_pos = ftell(f) ;
 			ELF->ind_etstrtab = i ;
 			lire_Table_Chaines (ELF, f) ;
 			fseek(f, save_pos, SEEK_SET) ;
+			ELF->Sections[i] = (void *) ELF->Table_Chaines ;
 			
 			
 		}
 		
 		else if (Entete_Section->sh_type == SHT_SYMTAB) {
-		
+			
 			save_pos = ftell(f) ;
 			ELF->ind_etsymtab = i ;
 			ELF->lts = ELF->Entetes_Sections[ELF->ind_etsymtab]->sh_size / ELF->Entetes_Sections[ELF->ind_etsymtab]->sh_entsize ;
 			lire_Table_Symboles (ELF, f) ;
 			fseek(f, save_pos, SEEK_SET) ;
+			ELF->Sections[i] = (void *) ELF->Table_Symboles ;
+			
 			
 		}
 		
+		else {
+			
+			save_pos = ftell(f) ;
+			lire_Section (ELF, i, f) ;
+			fseek(f, save_pos, SEEK_SET) ;
+			
+		}
 	}
 	
 }
 
 
 
-void afficher_noms_symboles (donnees_ELF ELF) {
+/*void afficher_noms_symboles (donnees_ELF ELF) {
 
 	for (int i = 0 ; i < ELF->lts ; i++) {
 	
@@ -187,8 +171,7 @@ void afficher_noms_symboles (donnees_ELF ELF) {
 	
 	}
 	
-}
-
+}*/
 
 
 int est_fichier_ELF (unsigned char Magic_Number_ELF[TAILLE_MAGIC_NUMBER], Elf32_Ehdr *Entete) {
@@ -212,10 +195,12 @@ void liberer_struct_ELF (donnees_ELF *ELF) {
 	for (int i = 0 ; i < (*ELF)->les ; i++) {
 		
 		free((*ELF)->Entetes_Sections[i]) ;
+		if (i != (*ELF)->ind_etsymtab) free((*ELF)->Sections[i]) ;
 		
 	}
 			
 	free ((*ELF)->Entetes_Sections) ;
+	free((*ELF)->Sections) ;
 	
 	for (int i = 0 ; i < (*ELF)->lts ; i++) {
 		
@@ -223,9 +208,8 @@ void liberer_struct_ELF (donnees_ELF *ELF) {
 		
 	}
 	
-	free ((*ELF)->Table_Symboles) ;
-	free ((*ELF)->Table_Chaines_ES) ;
-	free ((*ELF)->Table_Chaines) ;
+	free((*ELF)->Table_Symboles) ;
+	
 	free (*ELF) ;
 	
 	*ELF = NULL ;
@@ -268,15 +252,17 @@ int main (int argc, char **argv) {
 			
 			lire_Entetes_Sections (ELF, f) ;
 			
-			afficher_noms_symboles (ELF) ;
+			//afficher_noms_symboles (ELF) ;
 	
 			afficher_entete (ELF->Entete_ELF) ;
+			
+			printf("\n\n") ;
 			
 			afficher_entetes_sections (ELF) ;
 			
 			if (argc == 3) {
 			
-				//afficher_contenu_sections (ELF, f, argv[2]) ;
+				afficher_contenu_sections (ELF, argv[2]) ;
 				
 			}
 			

@@ -84,12 +84,9 @@ void afficher_legende_flags() {
 
 }
 
-void afficher_nom_section(char* str, Elf32_Shdr* Entete_Section) { 
-	int i = Entete_Section->sh_name;
-        while (str[i] != '\0') {
-            printf("%c", str[i]);
-            i++;
-        }	
+void afficher_nom_section(donnees_ELF ELF, int i) { 
+	
+	printf("%s", ELF->Table_Chaines_ES + ELF->Entetes_Sections[i]->sh_name) ;	
 	
 }
 
@@ -97,68 +94,19 @@ void afficher_entetes_sections (donnees_ELF ELF) {
 
 	int i ;
 
-	printf("[Nr]\tTaille\tType\t\tInfo\tPerm.\tDecal.\tNom\n");	
-    		
-    for (i = 0 ; i < ELF->les ; i++) {
+	printf("[Nr]\tTaille\tType\t\tInfo\tPerm.\tDecal.\tNom\n");
 	
+    for (i = 0 ; i < ELF->les ; i++) {
+		
 		printf("[%i]\t", i);
 		afficher_size_section(ELF->Entetes_Sections[i]);
 		afficher_type_section(ELF->Entetes_Sections[i]);
 		afficher_info_section(ELF->Entetes_Sections[i]);
 		afficher_flags_section(ELF->Entetes_Sections[i]);
 		afficher_decalage_section(ELF->Entetes_Sections[i]);
-		afficher_nom_section(ELF->Table_Chaines, ELF->Entetes_Sections[i]);
+		afficher_nom_section(ELF, i);
 		printf("\n");
 		
 	}
 	
 }
-	
-/*	
-
-int main (int argc, char **argv) {
-
-	if (argc == 2) {
-		FILE *f ;
-		int i;
-		
-		f = fopen(argv[1], "r") ;
-	
-		//récupération de l'entete du fichier ELF
-		Elf32_Ehdr* Entete_ELF = lire_Entete_ELF (f) ;
-		
-		//récupération de l'entete des sections
-		int nbSections = Entete_ELF->e_shnum;
-    		Elf32_Shdr* table_Entete_Sections[nbSections];
-    		
-    		
-    		//création de la table des sections
-    		for (i = 0; i < nbSections; i++) {
-    			table_Entete_Sections[i] = malloc(sizeof (Elf32_Shdr));
-    			table_Entete_Sections[i] = lire_Entete_Section(f, i, Entete_ELF);
-    		}
-    		
-    		
-
-    		//lecture de la table des sections
-    		printf("[Nr]\tTaille\tType\t\tInfo\tPerm.\tDecal.\tNom\n");	
-    		for (i = 0; i < nbSections; i++) {
-        		printf("[%i]\t", i);
-        		afficher_size_section(table_Entete_Sections[i]);
-    			afficher_type_section(table_Entete_Sections[i]);
-    			afficher_info_section(table_Entete_Sections[i]);
-    			afficher_flags_section(table_Entete_Sections[i]);
-			afficher_decalage_section(table_Entete_Sections[i]);
-			afficher_nom_section(tableNoms,table_Entete_Sections[i]);
-			printf("\n");
-       			
-    		}
-    		afficher_legende_flags();
-		fclose(f) ;
-
-	
-	}
-	
-	return 0 ;
-	
-}*/

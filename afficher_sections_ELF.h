@@ -19,9 +19,7 @@ void afficher_flags_section(Elf32_Shdr* Entete_Section) ;
 
 void afficher_legende_flags() ;
 
-void afficher_nom_section(char* str, Elf32_Shdr* Entete_Section) ;
-
-char * getTableNoms(donnees_ELF ELF, FILE *f) ;
+void afficher_nom_section(donnees_ELF ELF, int i) ;
 
 void afficher_entetes_sections (donnees_ELF Entetes_Sections) ;
 
