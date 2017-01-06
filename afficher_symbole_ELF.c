@@ -92,7 +92,7 @@ void afficher_visibilite_symbole(Elf32_Sym *symbole) {
 		case STV_DEFAULT : printf("Indéfini") ; break ;
 		case STV_HIDDEN : printf("Non valable dans d'autres modules") ; break ;
 		case STV_PROTECTED  : printf("Préemptible ou non exporté") ; break ;
-		default : printf("Spécifique au Processeur") ;
+		default : printf("Erreur") ;
 		
 	}
 	
