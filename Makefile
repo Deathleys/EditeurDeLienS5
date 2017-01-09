@@ -3,21 +3,22 @@
 #############################################################################
 # utilisation des variables internes $< $@ $* $^
 # $@ : correspond au nom de la cible
-# $< : correspond au nom de la premiere dependance
-# $* : correspond au nom du fichier sans extension 
-#       (dans les regles generiques uniquement)
+# $< : correspond au nom de la premiere dépendance
+# $* : correspond au nom du fichier sans extension
+# $^ : correspond aux noms des dépendances
+#       (dans les règles génériques uniquement)
 #############################################################################
-# information sur la regle executee avec la commande @echo
-# (une commande commancant par @ n'est pas affichee a l'ecran)
-#############################################################################
-
-
-#############################################################################
-# definition des variables locales
+# information sur la règle exécutée avec la commande @echo
+# (une commande commençant par @ n'est pas affichée à l'écran)
 #############################################################################
 
+
 #############################################################################
-#       modifier si necessaire les variables BASEDIR et LIBDIRX11           #
+# définition des variables locales
+#############################################################################
+
+#############################################################################
+#       modifier si nécessaire les variables BASEDIR et LIBDIRX11           #
 
 # repertoire de base de la librairie graphsimple au DLST - serveur turing
 BASEDIR = /Public/234_Public
@@ -33,15 +34,15 @@ LIBDIRX11 = /usr/lib/x86_64-linux-gnu
 CC = gcc
 
 # options de compilation
-CFLAGS = -Wall -Werror -std=c99
+CFLAGS = -Wall -Werror -std=c99 -Wpadded
 
-# chemin d'acces aux librairies (interfaces)
+# chemin d'accès aux librairies (interfaces)
 INCDIR = $(BASEDIR)/lib
 
-# chemin d'acces aux librairies (binaires)
+# chemin d'accès aux librairies (binaires)
 LIBDIR = $(BASEDIR)/lib
 
-# options pour l'edition des liens
+# options pour l'édition des liens
 GNATLDOPTS = -L$(LIBDIR) -lgraphsimple \
              -L$(LIBDIRX11) -lX11 -lrt -lm -lXpm
 
@@ -51,12 +52,12 @@ INCLUDEOPTS = -I$(INCDIR)
 # options de compilation
 COMPILOPTS = -g $(INCLUDEOPTS)
 
-# liste des executables
+# liste des exécutables
 EXECUTABLES = run
 
 
 #############################################################################
-# definition des regles
+# définition des règles
 #############################################################################
 
 ########################################################
@@ -64,24 +65,24 @@ EXECUTABLES = run
 all : run
 
 ########################################################
-# regle generique : 
-#  remplace les règles de compilation separée de la forme
+# règle générique : 
+#  remplace les règles de compilation séparée de la forme
 #	module.o : module.c module.h
 #		$(CC) $(CFLAGS) -c module.c
 %.o : %.c %.h
 	@echo ""
 	@echo "---------------------------------------------"
-	@echo "Compilation du paquetage "$*
+	@echo "Compilation du module "$*
 	@echo "---------------------------------------------"
 	$(CC) $(CFLAGS) -c $<
 
 ########################################################
-# regles explicites de creation des executables
+# règles explicites de création des exécutables
 	
-run : lecture_fichier_ELF.o afficher_sections_contenu_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
+run : lecture_fichier_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
 	@echo ""
 	@echo "---------------------------------------------"
-	@echo "Creation de l'executable "$@
+	@echo "Création de l'exécutable "$@
 	@echo "---------------------------------------------"
 	$(CC) $(CFLAGS) $^ -o $@
 
@@ -91,11 +92,11 @@ all_exec : $(EXECUTABLES)
 
 
 ########################################################
-# regle pour "nettoyer" le répertoire
+# règle pour "nettoyer" le répertoire
 clean:
 	@echo ""
 	@echo "---------------------------------------------"
 	@echo "Nettoyage du repertoire "
 	@echo "---------------------------------------------"
-	rm -fR $(EXECUTABLES) afficher_sections_contenu_ELF.o lecture_fichier_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
+	rm -fR $(EXECUTABLES) afficher_symbole_ELF.o afficher_sections_contenu_ELF.o lecture_fichier_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
 

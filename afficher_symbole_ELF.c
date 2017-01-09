@@ -1,119 +1,141 @@
 #include "afficher_symbole_ELF.h"
 
-void afficher_nom_symbole(char* str, Elf32_Sym *symbole) { 
+void afficher_valeur_symbole (Elf32_Sym *Symbole) {
 	
-	int i = symbole->st_name;
-	if(i!=0){
-       	while (str[i] != '\0') { 
-           	printf("%c", str[i]);
-           	i++;
-	       }	
-	}
+	printf("    0x%.8x    ", Symbole->st_value) ;
 	
 }
 
-
-void afficher_ndx_symbole(Elf32_Sym *symbole) {
-
-	//printf("Relation section : ") ;
-
-	switch (symbole->st_shndx) {
-		case 0: printf("UND "); break;
-		case 65521: printf("ABS "); break;
-		case 65522: printf("COM "); break;
-		default : printf("%i";symbole->st_shndx) ;	
-	}
+void afficher_taille_symbole (Elf32_Sym *Symbole) {
+	
+	printf("    0x%.8x    ", Symbole->st_size) ;
+	
 }
 
-void afficher_type_symbole(Elf32_Sym *symbole) {
+void afficher_type_symbole(Elf32_Sym *Symbole) {
 	
-	//Vérifier ELF32_ST_TYPE(), besoin pour récolter info.
-
-	//printf("Type de symbole et de liaison : ") ;
-
-	switch ( ELF32_ST_TYPE(symbole->st_info) {
+	switch (ELF32_ST_TYPE(Symbole->st_info)) {
 	
-		case STT_NOTYPE : printf("Indéfini") ; break ;
-		case STT_OBJECT  : printf("Donnée objet") ; break ;
-		case STT_FUNC : printf("Fonc. ou code exéc.") ; break ;
-		case STT_SECTION  : printf("Section") ; break ;
-		case STT_FILE  : printf("Fichier") ; break ; // A vérifier, donne le nom de fichier normalement.
-		case STT_LOPROC : printf("Spéc. au Proc.") ; break ;
-		case STT_HIPROC : printf("Spéc. au Proc.") ; break ;
-		default : printf("Erreur") ;
+		case STT_NOTYPE   : printf("     INDEFINI     ") ; break ;
+		case STT_OBJECT   : printf("      OBJET       ") ; break ;
+		case STT_FUNC     : printf("     FONCTION     ") ; break ;
+		case STT_SECTION  : printf("     SECTION      ") ; break ;
+		case STT_FILE     : printf("     FICHIER      ") ; break ;
+		case STT_LOPROC   : printf("     SPECPROC     ") ; break ;
+		case STT_HIPROC   : printf("     SPECPROC     ") ; break ;
+		default           : printf("      ERREUR      ") ;
 		
 	}
 	
 }
 
-void afficher_portee_symbole (Elf32_Sym *symbole) {
+void afficher_portee_symbole (Elf32_Sym *Symbole) {
 	
-	// Vérifier ELF32_ST_BIND()
-
-	//printf("Type de portée : ") ;
+	switch (ELF32_ST_BIND(Symbole->st_info)) {
 	
-	switch (ELF32_ST_BIND(symbole->st_info)) {
-	
-		case STB_LOCAL : printf("Locale") ; break ;
-		case STB_GLOBAL  : printf("Global") ; break ;
-		case STB_WEAK : printf("Faible") ; break ;
-		case STB_LOPROC : printf("Spécifique au Processeur") ; break ;
-		case STB_HIPROC : printf("Spécifique au Processeur") ; break ;
-		default : printf("Erreur") ;
+		case STB_LOCAL   : printf("      LOCALE      ") ; break ;
+		case STB_GLOBAL  : printf("      GLOBALE     ") ; break ;
+		case STB_WEAK    : printf("      FAIBLE      ") ; break ;
+		case STB_LOPROC  : printf("     SPECPROC     ") ; break ;
+		case STB_HIPROC  : printf("     SPECPROC     ") ; break ;
+		default          : printf("      ERREUR      ") ;
 		
 	}
 	
 }
 
-void afficher_valeur_symbole (Elf32_Sym *symbole) {
-
-	//printf("Valeur : ") ;
+void afficher_visibilite_symbole(Elf32_Sym *Symbole) {
 	
-	printf("%u",symbole->st_value)
+	switch (Symbole->st_other) {
 	
-}
-
-void afficher_taille_symbole (Elf32_Sym *symbole) {
-
-	//printf("Taille : ") ;
-	
-	printf("%06u",symbole->st_size)
-	
-}
-
-void afficher_visibilite_symbole(Elf32_Sym *symbole) {
-	
-	//Vérifier ELF32_ST_TYPE()
-
-	//printf("Type de visibilité : ") ;
-	
-	switch (symbole->other) {
-	
-		case STV_DEFAULT : printf("Indéfini") ; break ;
-		case STV_HIDDEN : printf("Non valable dans d'autres modules") ; break ;
-		case STV_PROTECTED  : printf("Préemptible ou non exporté") ; break ;
-		default : printf("Erreur") ;
+		case STV_DEFAULT    : printf("     INDEFINI     ") ; break ;
+		case STV_HIDDEN     : printf("       NVAM       ") ; break ;
+		case STV_PROTECTED  : printf("       PONE       ") ; break ;
+		default             : printf("      ERREUR      ") ;
 		
 	}
 	
 }
 
-void afficher_table_symbole (donnee_ELF ELF) {
-	int i ;
-	printf("Num\tValeur\tTail\tType\tLien\tVis\tNdx\tNom\n");	
-    		
-    for (i = 0 ; i < ELF->lts ; i++) {
+void afficher_ndx_symbole(Elf32_Sym *Symbole) {
 
-		printf("[%i]:\t", i);
-		afficher_valeur_symbole (ELF->Tables_Symbole) ;printf("\t");
-		afficher_taille_symbole (ELF->Tables_Symbole) ;printf("\t");
-		afficher_type_symbole (ELF->Tables_Symbole);printf("\t");
-		afficher_portee_symbole_symbole (ELF->Tables_Symbole);printf("\t");
-		afficher_visibilite_symbole(ELF->Tables_Symbole) ;printf("\t");
-		afficher_ndx_symbole(ELF->Tables_Symbole);printf("\t");
-		afficher_nom_symbole(ELF->Table_Chaines,ELF->Tables_Symbole); // Changer tables_chaines pour prendre la table des symboles.
-		printf("\n");
+	switch (Symbole->st_shndx) {
+		
+		case 0     : printf("       UND        ") ; break ;
+		case 65521 : printf("       ABS        ") ; break ;
+		case 65522 : printf("       COM        ") ; break ;
+		default    : printf("     [%06i]     ", Symbole->st_shndx) ;	
+	
+	}
+}
+
+void afficher_nom_symbole(donnees_ELF ELF, int i) {
+	
+	char * nom = ELF->Table_Chaines + ELF->Table_Symboles[i]->st_name ;
+	
+	if ((*nom)) {
+		
+		int l = strlen(nom), nb_esp = COL_SYMTAB - l - 2,  esp = nb_esp / 2 ;
+		
+		for (int i = 0 ; i < esp ; i++) printf(" ") ;
+		printf(nom) ;
+		for (int i = 0 ; i < (nb_esp & 1 ? esp + 1 : esp) ; i++) printf(" ") ;
 		
 	}
+		
+	else
+		
+		printf("               INDEFINI               ") ;
+	
+}
+
+void afficher_legende_table_symboles() {
+
+	printf("\nVisibilité : NVAM (Non Valable dans d'Autres Modules), PONE (Préemptible Ou Non Exporté)");
+
+}
+
+void afficher_table_symboles (donnees_ELF ELF) {
+
+	DESSINER_LIGNE(COULEUR_CARRE_TS, LONGUEUR_TS + COL_SYMTAB) ;
+	DESSINER_2BORDURES(COULEUR_CARRE_TS, LONGUEUR_TS + COL_SYMTAB) ;
+	ECRIRE_TITRE(COULEUR_CARRE_TS, TITRE_TS, COULEUR_POLICE_TS, LONGUEUR_TS + COL_SYMTAB) ;
+	DESSINER_2BORDURES(COULEUR_CARRE_TS, LONGUEUR_TS + COL_SYMTAB) ;
+	
+	DESSINER_LIGNE(COULEUR_CARRE_TS,LONGUEUR_TS + COL_SYMTAB) ;
+	DESSINER_COL_TS() ;
+	
+	CARRE(COULEUR_CARRE_TS) ; printf("                NOMSYM                ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("     [NUMERO]     ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("      VALEUR      ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("      TAILLE      ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("       TYPE       ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("       LIEN       ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("    VISIBILITE    ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("      INDICE      ") ;
+	CARRE(COULEUR_CARRE_TS) ; printf("\n") ;
+	
+	DESSINER_COL_TS() ;
+	DESSINER_LIGNE(COULEUR_CARRE_TS, LONGUEUR_TS + COL_SYMTAB) ;
+	DESSINER_COL_TS() ;
+	
+    for (int i = 0 ; i < ELF->lts ; i++) {
+		
+		CARRE(COULEUR_CARRE_TS) ;  afficher_nom_symbole(ELF, i) ;
+		CARRE(COULEUR_CARRE_TS) ;  printf("     [%06i]     ", i) ;
+		CARRE(COULEUR_CARRE_TS) ;  afficher_valeur_symbole (ELF->Table_Symboles[i]) ;
+		CARRE(COULEUR_CARRE_TS) ;  afficher_taille_symbole (ELF->Table_Symboles[i]) ;
+		CARRE(COULEUR_CARRE_TS) ;  afficher_type_symbole (ELF->Table_Symboles[i]) ;
+		CARRE(COULEUR_CARRE_TS) ;  afficher_portee_symbole (ELF->Table_Symboles[i]) ;
+		CARRE(COULEUR_CARRE_TS) ;  afficher_visibilite_symbole(ELF->Table_Symboles[i]) ;
+		CARRE(COULEUR_CARRE_TS) ;  afficher_ndx_symbole(ELF->Table_Symboles[i]) ;
+		CARRE(COULEUR_CARRE_TS) ;  printf("\n") ;
+		
+	}
+	
+	DESSINER_COL_TS() ;
+	DESSINER_LIGNE(COULEUR_CARRE_TS, LONGUEUR_TS + COL_SYMTAB) ;
+	
+	afficher_legende_table_symboles() ;
 	
 }
