@@ -1,0 +1,18 @@
+Phase 1 :
+Fonctionnalités:
+	i) finir la gestion des sections RELA pour etape 5 Relocation
+
+Détails:
+	i) lecture_fichier_ELF.c :
+		- séparer mise en structure et affichage
+		- mieux factoriser (lire_Entetes_Sections et les save_pos ; lire_Section ~ lire_Table_Symboles ~  lire_Table_Chaines_ES ~ lire_Table_Chaines
+
+	ii) préférer aux switch case des tableaux de valeurs (cf les tab de rel)
+
+	iii) modifier l'affichae du header plus dans l'idée de readelf
+	
+	iv) gérer le paramètrage du programmme comme montrer en annexe
+
+Phase 2 :
+
+	i) continuer etape 6 
