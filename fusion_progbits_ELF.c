@@ -57,9 +57,14 @@ void concatenation_section_progbits(donnees_ELF ELF1, donnees_ELF ELF2, donnees_
 							fprintf(stderr, "Erreur d'allocation") ;
 							exit(1);	
 						}else{
-							ELF3->Sections[i + ELF2->Entetes_Sections[j]->sh_size] = ELF2->Sections[j];// ajout du contenu de ELF2 après ELF1
 							ELF3->Entetes_Sections[i]->sh_size += ELF2->Entetes_Sections[j]->sh_size; // augmentation de la taille donnée pour cette section
 							decalage = ELF2->Entetes_Sections[j]->sh_size;
+							
+							
+							//ELF3->Sections[i + ELF2->Entetes_Sections[j]->sh_size] = ELF2->Sections[j];// ajout du contenu de ELF2 après ELF1
+							ELF3->Sections[i] = realloc(ELF3->Sections[i], ELF3->Entetes_Sections[i]->sh_size );
+							memcpy(ELF3->Sections[i] + ELF1->Entetes_Sections[i]->sh_size,ELF2->Sections[j],ELF2->Entetes_Sections[j]->sh_size);
+
 						}
 					}
 				}
@@ -99,24 +104,16 @@ void ajout_section_progbits(donnees_ELF ELF1, donnees_ELF ELF2, donnees_ELF ELF3
 				ELF3->Entetes_Sections[ELF3->les]->sh_offset = ELF3->Entetes_Sections[ELF3->les-1]->sh_offset + ELF3->Entetes_Sections[ELF3->les-1]->sh_size;
 				
 				//Contenu de section
-				/*ELF3->Sections = (void **) realloc(ELF3->Sections, sizeof(ELF3->Sections) + ELF2->Entetes_Sections[i]->sh_size);
-				char *nouveau_contenu_section = (char *) malloc(ELF2->Entetes_Sections[i]->sh_size);
-				memcpy(nouveau_contenu_section, (ELF2->Sections[i]), ELF2->Entetes_Sections[i]->sh_size);
-				ELF3->Sections[ELF3->les-1] = nouveau_contenu_section;*/
+				ELF3->Sections = (void **) realloc(ELF3->Sections, sizeof(ELF3->Sections) * (ELF3->les + 1));
+				ELF3->Sections[ELF3->les] = malloc(ELF3->Entetes_Sections[ELF3->les]->sh_size);
 				
+				memcpy(ELF3->Sections[ELF3->les], ELF2->Sections[i], ELF3->Entetes_Sections[ELF3->les]->sh_size);
 				
 				
 				//shnum + 1 / les + 1 dans l'en-tête de ELF3
 				ELF3->les = ELF3->les + 1;
 				ELF3->Entete_ELF->e_shnum = ELF3->Entete_ELF->e_shnum + 1;
-				
-				//Contenu de section
-				ELF3->Sections = (void **) realloc(ELF3->Sections, sizeof(ELF3->Sections) + sizeof(void*) );
-				char * nouveau_contenu_section = malloc(ELF2->Entetes_Sections[i]->sh_size);
-				memcpy(nouveau_contenu_section, ELF2->Sections[i], ELF2->Entetes_Sections[i]->sh_size);
-				ELF3->Sections[ELF3->les-1] = (void *) nouveau_contenu_section;
-				
-				
+								
 				ajouter_nom_section(ELF3, get_nom_section(ELF2, i));
 				
 				
