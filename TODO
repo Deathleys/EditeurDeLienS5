@@ -24,6 +24,64 @@ Phase 2 :
 
 LIVRABLES :
 
-	i) mettre à jour le journal de bord à ce jour
+	i) howto.txt : = mode d'emploi = fichier texte expliquant comment compiler, comment lancer l'exec (quelles options etc), comment tester chaque etapes [20 ligne max! ]
+	ii) readme.txt : expliquer fichier elf.c et type .h  : comment depuis les fichiers en parametres on passe à la mise en structure pour utilisation
+		fusionner les deux dans readme
 
-	ii) 
+	iii) done.txt : fonctionnalités OK 
+	iii) todo.txt : fonctionnalités NOK
+	iii) bugs.txt : bugs connus (à mettre potentiellement dans done.txt et todo.txt)
+
+	iv) test.txt : explication des jeux de tests
+
+	iv) mettre à jour le journal de bord à ce jour
+
+
+
+JEUX DE TESTS :
+
+	i) Trouver/Produire des fichiers objet compilé en ARM pour tests;
+
+	ii) Jeux de tests
+		- phase 1 etape 1 : passage d'un fichier non format elf 32 ARM, 
+		- phase 1 etape 2 : divers entetes avec ou sans cross compilation
+		- phase 1 etape 3 : moins de deux fichiers (format elf 32 ou non),  chiffre invalide (<0 ou supérieurs au nombre de section, nom inexistant ou existant plus long (.texto)
+		- phase 1 etape 4 : ???
+		- phase 1 etape 5 : fichier.O avec plus d'une section REL
+
+		- phase 2 etape 6 :
+			- cas 1 = juste ajout (pas de sections identiques entre les deux file.o)
+			- cas 2 = juste concatenation (que des sections identiques entre les deux file.o)
+			- cas 3 = concatenation et ajout
+			- cas supp : entete header et/ou entete prog déplacer par une concatenation
+
+
+	iii) test-phase1-etapei.c de tests à base d'assert (+ajout dans le makefile de :
+				find_program(VALGRIND "valgrind")
+
+				enable_testing()
+
+				macro (do_test name)
+					add_executable(${name} ${name}.c)
+					add_dependencies(${name} hash-table)
+					target_link_libraries(${name} hash-table)
+					if(VALGRIND)
+						add_test(${name} valgrind --leak-check=full --quiet --error-exitcode=1 ./${name})
+					else()
+						add_test(${name} ./${name})
+					endif()
+				endmacro (do_test)
+				 
+				do_test(test-phase1-etape1)
+
+		exemple test-phase1-etape1.c:
+				#ifdef NDEBUG
+				#undef NDEBUG
+				#endif
+				#include <assert.h>
+
+
+				int main()
+				{
+					assert(truc à test);
+				}
