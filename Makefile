@@ -79,7 +79,7 @@ all : run
 ########################################################
 # règles explicites de création des exécutables
 	
-run : lecture_fichier_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
+run : main.o lecture_fichier_ELF.o afficher_tables_reimplantation_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
 	@echo ""
 	@echo "---------------------------------------------"
 	@echo "Création de l'exécutable "$@
@@ -98,5 +98,5 @@ clean:
 	@echo "---------------------------------------------"
 	@echo "Nettoyage du repertoire "
 	@echo "---------------------------------------------"
-	rm -fR $(EXECUTABLES) afficher_symbole_ELF.o afficher_sections_contenu_ELF.o lecture_fichier_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
+	rm -fR $(EXECUTABLES) main.o afficher_tables_reimplantation_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o lecture_fichier_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
 
