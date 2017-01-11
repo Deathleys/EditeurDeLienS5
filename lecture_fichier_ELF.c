@@ -117,7 +117,10 @@ bool lire_Table_Symboles (donnees_ELF ELF, int ind_table_symboles, char * Donnee
 void lire_Table_Chaines (donnees_ELF ELF, int ind_table, char ** Table, char * Donnees_ELF) {
 	
 	Elf32_Shdr *Entete_Table_Chaines = ELF->Entetes_Sections[ind_table] ;
-  	*Table = (Donnees_ELF + Entete_Table_Chaines->sh_offset) ;
+	
+	char *np = malloc (Entete_Table_Chaines->sh_size) ;
+	memcpy(np, Donnees_ELF + Entete_Table_Chaines->sh_offset, Entete_Table_Chaines->sh_size) ;
+  	*Table = np ;
   	
 }
 
