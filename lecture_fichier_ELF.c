@@ -86,7 +86,7 @@ void lire_Entete_Programme (donnees_ELF ELF, char * Donnees_ELF) {
 void lire_Section (donnees_ELF ELF, int ind_section, char * Donnees_ELF) {
 	
 	Elf32_Shdr *Entete_Section = ELF->Entetes_Sections[ind_section] ;
-    ELF->Sections[ind_section] = (void *) (Donnees_ELF + Entete_Section->sh_offset) ;
+    ELF->Sections[ind_section] = Donnees_ELF + Entete_Section->sh_offset ;
 		
 }
 
@@ -107,7 +107,7 @@ bool lire_Table_Symboles (donnees_ELF ELF, int ind_table_symboles, char * Donnee
 		
 		
 		
-		ELF->Sections[ind_table_symboles] = (void *) ELF->Table_Symboles ;
+		ELF->Sections[ind_table_symboles] = Donnees_ELF + Entete_Table_Symboles->sh_offset ;
 	
 	}
 	
@@ -145,7 +145,7 @@ bool lire_Section_Rel (donnees_ELF ELF, int ind_section_rel, Section_Rel **Table
 			
 	}
 		
-	ELF->Sections[ind_section_rel] = (void *) *Table_Rel ;
+	ELF->Sections[ind_section_rel] = Donnees_ELF + Entete_Section_Rel->sh_offset ;
     
     return alloc ;
 
