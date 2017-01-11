@@ -19,6 +19,8 @@ void lire_Table_Chaines (donnees_ELF ELF, int ind_table, char ** Table, char * D
 
 bool lire_Section_Rel (donnees_ELF ELF, int ind_section_rel, Section_Rel **Table_Rel, char * Donnees_ELF) ;
 
+bool lire_Section_Progbits (donnees_ELF ELF, int ind_section_progbits, Section_Progbits **Table_Progbits, char * Donnees_ELF) ;
+
 bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) ;
 
 bool est_fichier_ELF (unsigned char Magic_Number_ELF[TAILLE_MAGIC_NUMBER], Elf32_Ehdr Entete) ;

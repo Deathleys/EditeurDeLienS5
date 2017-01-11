@@ -28,6 +28,7 @@ donnees_ELF initialiser_donnees_ELF () {
 		ELF->Entetes_Sections = NULL ;       // stocke les en-têtes de section
 		ELF->Table_Symboles = NULL ;         // stocke les symboles de type Elf32_Sym 
 		ELF->Table_Rel = NULL ;              // stocke les entrées de section de type Elf32_Rel
+		ELF->Table_Progbits = NULL ;              // stocke les entrées de section de type Elf32_Rel
 	
 		ELF->Table_Chaines_ES = NULL ;       // table des chaines des noms des entêtes de section (.shstrtab)
 		ELF->Table_Chaines = NULL ;          // table des chaines des noms de symbole (.strtab)
@@ -61,6 +62,7 @@ bool lire_Entete_ELF (donnees_ELF *ELF, char ** Donnees_ELF, FILE *f, unsigned c
 			for (int i = Entete_ELF.e_ehsize ; i < l ; i++) (*Donnees_ELF)[i] = fgetc(f) ;
 			
 			*ELF = initialiser_donnees_ELF() ;
+			(*ELF)->taille = l ;
 			
 			if (*ELF) (*ELF)->Entete_ELF = (Elf32_Ehdr *) *Donnees_ELF ;
 			
@@ -149,6 +151,35 @@ bool lire_Section_Rel (donnees_ELF ELF, int ind_section_rel, Section_Rel **Table
 
 }
 
+bool lire_Section_Progbits (donnees_ELF ELF, int ind_section_progbits, Section_Progbits **Table_Progbits, char * Donnees_ELF) {
+	
+	Elf32_Shdr *Entete_Section_Progbits = ELF->Entetes_Sections[ind_section_progbits] ;
+	
+	bool alloc = false ;
+	Section_Progbits *SP = malloc (sizeof *SP) ;
+	
+	if (SP) {
+				
+		SP->ind = ind_section_progbits ;
+		
+		SP->taille = Entete_Section_Progbits->sh_size ;
+		
+		SP->fich = (void *)ELF ;
+		
+		SP->succ = *Table_Progbits ;
+		
+		*Table_Progbits = SP ;
+			
+		alloc = true ;
+			
+	}
+		
+	ELF->Sections[ind_section_progbits] = Donnees_ELF + Entete_Section_Progbits->sh_offset ;
+    
+    return alloc ;
+
+}
+
 bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) {
 	
 	bool alloc = true ;
@@ -161,6 +192,10 @@ bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) {
 		for (int i = 0 ; i < ELF->les && alloc ; i++) {
 	
 			ELF->Entetes_Sections[i] = (Elf32_Shdr *) (Donnees_ELF + ELF->Entete_ELF->e_shoff + i * sizeof (Elf32_Shdr)) ;
+			
+			if (ELF->Entetes_Sections[i]->sh_type == SHT_REL)
+			
+				alloc = lire_Section_Rel (ELF, i, &(ELF->Table_Rel), Donnees_ELF) ;
 	
 			if (i == ELF->Entete_ELF->e_shstrndx)
 		
@@ -177,6 +212,10 @@ bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) {
 			else if (ELF->Entetes_Sections[i]->sh_type == SHT_REL)
 			
 				alloc = lire_Section_Rel (ELF, i, &(ELF->Table_Rel), Donnees_ELF) ;
+				
+			else if (ELF->Entetes_Sections[i]->sh_type == SHT_PROGBITS)
+			
+				alloc = lire_Section_Progbits (ELF, i, &(ELF->Table_Progbits), Donnees_ELF) ;
 	
 			else 
 			
