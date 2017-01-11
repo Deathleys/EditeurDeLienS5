@@ -21,7 +21,7 @@
 #       modifier si nécessaire les variables BASEDIR et LIBDIRX11           #
 
 # repertoire de base de la librairie graphsimple au DLST - serveur turing
-BASEDIR = /Public/234_Public
+BASEDIR = $(HOME)
 
 # chemin d'acces aux librairies X11 et Xpm au DLST - serveur turing
 LIBDIRX11 = /usr/lib/x86_64-linux-gnu
@@ -37,17 +37,17 @@ CC = gcc
 CFLAGS = -Wall -Werror -std=c99 -Wpadded
 
 # chemin d'accès aux librairies (interfaces)
-INCDIR = $(BASEDIR)/lib
+INCDIR = $(BASEDIR)/include
 
 # chemin d'accès aux librairies (binaires)
 LIBDIR = $(BASEDIR)/lib
 
 # options pour l'édition des liens
-GNATLDOPTS = -L$(LIBDIR) -lgraphsimple \
-             -L$(LIBDIRX11) -lX11 -lrt -lm -lXpm
+OBJETS_OPTS = -L$(LIBDIR) # -lgraphsimple \
+              #-L$(LIBDIRX11) -lX11 -lrt -lm -lXpm
 
 # options pour la recherche des fichiers .ali et .ads
-INCLUDEOPTS = -I$(INCDIR)
+INCLUDE_OPTS = -I$(INCDIR)
 
 # options de compilation
 COMPILOPTS = -g $(INCLUDEOPTS)
@@ -79,7 +79,7 @@ all : run
 ########################################################
 # règles explicites de création des exécutables
 	
-run : main.o lecture_fichier_ELF.o afficher_tables_reimplantation_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
+run : fusion_progbits_ELF.o fusion_symboles_ELF.o main.o lecture_fichier_ELF.o afficher_tables_reimplantation_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
 	@echo ""
 	@echo "---------------------------------------------"
 	@echo "Création de l'exécutable "$@
@@ -98,5 +98,5 @@ clean:
 	@echo "---------------------------------------------"
 	@echo "Nettoyage du repertoire "
 	@echo "---------------------------------------------"
-	rm -fR $(EXECUTABLES) main.o afficher_tables_reimplantation_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o lecture_fichier_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
+	rm -fR $(EXECUTABLES) main.o fusion_symboles_ELF.o fusion_progbits_ELF.o afficher_tables_reimplantation_ELF.o afficher_symbole_ELF.o afficher_sections_contenu_ELF.o lecture_fichier_ELF.o afficher_sections_ELF.o afficher_entete_ELF.o util.o
 
