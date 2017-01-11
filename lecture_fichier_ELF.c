@@ -86,7 +86,11 @@ void lire_Entete_Programme (donnees_ELF ELF, char * Donnees_ELF) {
 void lire_Section (donnees_ELF ELF, int ind_section, char * Donnees_ELF) {
 	
 	Elf32_Shdr *Entete_Section = ELF->Entetes_Sections[ind_section] ;
-    ELF->Sections[ind_section] = Donnees_ELF + Entete_Section->sh_offset ;
+    
+    char * np = malloc (Entete_Section->sh_size) ;
+    memcpy (np, Donnees_ELF + Entete_Section->sh_offset, Entete_Section->sh_size) ;
+    ELF->Sections[ind_section] = np ;
+    
 		
 }
 
@@ -104,10 +108,6 @@ bool lire_Table_Symboles (donnees_ELF ELF, int ind_table_symboles, char * Donnee
 		for (int i = 0 ; i < ELF->lts && alloc ; i++) 
 		
 			ELF->Table_Symboles[i] = (Elf32_Sym *) (Donnees_ELF + Entete_Table_Symboles->sh_offset + i * sizeof (Elf32_Sym)) ;
-		
-		
-		
-		ELF->Sections[ind_table_symboles] = Donnees_ELF + Entete_Table_Symboles->sh_offset ;
 	
 	}
 	
@@ -118,7 +118,6 @@ void lire_Table_Chaines (donnees_ELF ELF, int ind_table, char ** Table, char * D
 	
 	Elf32_Shdr *Entete_Table_Chaines = ELF->Entetes_Sections[ind_table] ;
   	*Table = (Donnees_ELF + Entete_Table_Chaines->sh_offset) ;
-  	ELF->Sections[ind_table] = (void *) *Table ;
   	
 }
 
@@ -144,8 +143,6 @@ bool lire_Section_Rel (donnees_ELF ELF, int ind_section_rel, Section_Rel **Table
 		alloc = true ;
 			
 	}
-		
-	ELF->Sections[ind_section_rel] = Donnees_ELF + Entete_Section_Rel->sh_offset ;
     
     return alloc ;
 
@@ -173,8 +170,6 @@ bool lire_Section_Progbits (donnees_ELF ELF, int ind_section_progbits, Section_P
 		alloc = true ;
 			
 	}
-		
-	ELF->Sections[ind_section_progbits] = Donnees_ELF + Entete_Section_Progbits->sh_offset ;
     
     return alloc ;
 
@@ -190,8 +185,10 @@ bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) {
 	if (ELF->Entetes_Sections && ELF->Sections) {
 	
 		for (int i = 0 ; i < ELF->les && alloc ; i++) {
-	
-			ELF->Entetes_Sections[i] = (Elf32_Shdr *) (Donnees_ELF + ELF->Entete_ELF->e_shoff + i * sizeof (Elf32_Shdr)) ;
+		
+			ELF->Entetes_Sections[i] = malloc (sizeof (Elf32_Shdr)) ;
+			memcpy(ELF->Entetes_Sections[i], Donnees_ELF + ELF->Entete_ELF->e_shoff + i * sizeof (Elf32_Shdr), sizeof (Elf32_Shdr)) ;
+			
 			
 			if (ELF->Entetes_Sections[i]->sh_type == SHT_REL)
 			
@@ -216,10 +213,9 @@ bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) {
 			else if (ELF->Entetes_Sections[i]->sh_type == SHT_PROGBITS)
 			
 				alloc = lire_Section_Progbits (ELF, i, &(ELF->Table_Progbits), Donnees_ELF) ;
-	
-			else 
+	 
 			
-				lire_Section (ELF, i, Donnees_ELF) ;
+			lire_Section (ELF, i, Donnees_ELF) ;
 	
 		}
 		
