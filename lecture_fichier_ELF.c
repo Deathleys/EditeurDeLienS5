@@ -113,7 +113,7 @@ bool lire_Table_Symboles (donnees_ELF ELF, int ind_table_symboles, char * Donnee
 	
 		for (int i = 0 ; i < ELF->lts && alloc ; i++) {
 		
-			Elf32_Sym * Sym = Donnees_ELF + Entete_Table_Symboles->sh_offset + i * sizeof (Elf32_Sym) ;
+			Elf32_Sym * Sym = (Elf32_Sym *) Donnees_ELF + Entete_Table_Symboles->sh_offset + i * sizeof (Elf32_Sym) ;
 		
 			ELF->Table_Symboles[i] = malloc (sizeof *Sym) ;
 			
@@ -191,8 +191,6 @@ bool lire_Section_Progbits (donnees_ELF ELF, int ind_section_progbits, Section_P
 		SP->ind = ind_section_progbits ;
 		
 		SP->taille = Entete_Section_Progbits->sh_size ;
-		
-		SP->fich = (void *)ELF ;
 		
 		SP->succ = *Table_Progbits ;
 		

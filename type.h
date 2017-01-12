@@ -8,18 +8,25 @@
 #include <byteswap.h>
 #include <string.h>
 #include "util.h"
-#include "liste.h"
 
 #define TAILLE_MAGIC_NUMBER 4
 #define MODE_BIG_ENDIAN 2
 #define CLASSE_32BITS 1
+
+// Déclaration d'un type Section_Progbits pour chaîner les sections de relocation
+
+typedef struct Liste_Sym {
+	
+	Elf32_Sym * sym ;
+	struct Liste_Sym * succ ;
+	
+} Liste_Sym ;
 
 
 // Déclaration d'un type Section_Progbits pour chaîner les sections de relocation
 
 typedef struct Section_Progbits {
 
-	void* fich ;
 	struct Section_Progbits *succ ;
 	int ind ;
 	int taille ;
@@ -48,12 +55,14 @@ typedef struct donnees_ELF {
 	
 	char *Table_Chaines_ES ;              // pointe sur la Table des chaines des noms des entêtes de section (.shstrtab)
 	char *Table_Chaines ;                 // pointe sur la Table des chaines des noms de symbole (.strtab)
-	void **Sections ;                     // pointe sur la Table des contenus de sections
+	char **Sections ;                     // pointe sur la Table des contenus de sections
 	
 	        int les ;                     // nombre d'en-têtes de section (ou nombre de sections) 
 		    int lts ;			          // nombre de symboles
 	long int taille ;                     // taille du fichier ELF
 	
 } *donnees_ELF ;
+
+donnees_ELF initialiser_donnees_ELF () ;
 
 #endif
