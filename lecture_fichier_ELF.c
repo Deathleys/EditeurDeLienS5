@@ -17,32 +17,6 @@ char * lire_Donnees_ELF (Elf32_Ehdr Entete, FILE *f, long int *l) {
 	
 }
 
-donnees_ELF initialiser_donnees_ELF () {
-	
-	donnees_ELF ELF = malloc (sizeof *ELF) ;
-	
-	if (ELF) {
-		
-		// initialisation des champs :
-		
-		ELF->Entetes_Sections = NULL ;       // stocke les en-têtes de section
-		ELF->Table_Symboles = NULL ;         // stocke les symboles de type Elf32_Sym 
-		ELF->Table_Rel = NULL ;              // stocke les entrées de section de type Elf32_Rel
-		ELF->Table_Progbits = NULL ;              // stocke les entrées de section de type Elf32_Rel
-	
-		ELF->Table_Chaines_ES = NULL ;       // table des chaines des noms des entêtes de section (.shstrtab)
-		ELF->Table_Chaines = NULL ;          // table des chaines des noms de symbole (.strtab)
-		ELF->Sections = NULL ;               // stocke le contenu des sections
-	
-		ELF->les = 0 ;                       // nombre d'en-têtes de section (ou nombre de sections) 
-		ELF->lts = 0 ;			             // nombre de symboles
-		
-	}
-	
-	return ELF ;
-
-}
-
 bool lire_Entete_ELF (donnees_ELF *ELF, char ** Donnees_ELF, FILE *f, unsigned char * Magic_Number_ELF) {
 	
 	bool Fichier_ELF = false ; long int l = 0 ;
@@ -64,7 +38,17 @@ bool lire_Entete_ELF (donnees_ELF *ELF, char ** Donnees_ELF, FILE *f, unsigned c
 			*ELF = initialiser_donnees_ELF() ;
 			(*ELF)->taille = l ;
 			
-			if (*ELF) (*ELF)->Entete_ELF = (Elf32_Ehdr *) *Donnees_ELF ;
+			if (*ELF) {
+				
+				(*ELF)->Entete_ELF = malloc (sizeof Entete_ELF) ;
+				
+				if ((*ELF)->Entete_ELF) memcpy ((*ELF)->Entete_ELF, &Entete_ELF, Entete_ELF.e_ehsize) ;
+				
+				else Fichier_ELF = false ;
+					
+					
+			}
+					
 			
 		}
 		
@@ -75,23 +59,45 @@ bool lire_Entete_ELF (donnees_ELF *ELF, char ** Donnees_ELF, FILE *f, unsigned c
 	
 }
 
-void lire_Entete_Programme (donnees_ELF ELF, char * Donnees_ELF) {
-
-	if (ELF->Entete_ELF->e_phnum)
+bool lire_Entete_Programme (donnees_ELF ELF, char * Donnees_ELF) {
+	
+	bool alloc = false ;
+	int taille_entete_programme = ELF->Entete_ELF->e_phentsize * ELF->Entete_ELF->e_phnum ;
+	
+	if (ELF->Entete_ELF->e_phnum) {
 		
-		ELF->Entete_Programme = (Elf32_Phdr *)(Donnees_ELF + ELF->Entete_ELF->e_phoff) ;
-
+		ELF->Entete_Programme = malloc (sizeof *ELF->Entete_Programme) ;
+		
+		if (ELF->Entete_Programme) {
+			
+			memcpy (ELF->Entete_Programme, Donnees_ELF + ELF->Entete_ELF->e_phoff, taille_entete_programme) ;
+			alloc = true ;
+				
+	   }
+	   
+	}
+	
+	return alloc ;
+	
 }
 
-void lire_Section (donnees_ELF ELF, int ind_section, char * Donnees_ELF) {
+bool lire_Section (donnees_ELF ELF, int ind_section, char * Donnees_ELF) {
 	
+	bool alloc = false ;
 	Elf32_Shdr *Entete_Section = ELF->Entetes_Sections[ind_section] ;
     
     char * np = malloc (Entete_Section->sh_size) ;
-    memcpy (np, Donnees_ELF + Entete_Section->sh_offset, Entete_Section->sh_size) ;
-    ELF->Sections[ind_section] = np ;
     
+    if (np) {
 		
+		memcpy (np, Donnees_ELF + Entete_Section->sh_offset, Entete_Section->sh_size) ;
+		ELF->Sections[ind_section] = np ;
+		alloc = true ;
+		
+	}
+	
+	return alloc ;
+    		
 }
 
 bool lire_Table_Symboles (donnees_ELF ELF, int ind_table_symboles, char * Donnees_ELF) {
@@ -105,22 +111,44 @@ bool lire_Table_Symboles (donnees_ELF ELF, int ind_table_symboles, char * Donnee
 		
 		alloc = true ;
 	
-		for (int i = 0 ; i < ELF->lts && alloc ; i++) 
+		for (int i = 0 ; i < ELF->lts && alloc ; i++) {
 		
-			ELF->Table_Symboles[i] = (Elf32_Sym *) (Donnees_ELF + Entete_Table_Symboles->sh_offset + i * sizeof (Elf32_Sym)) ;
+			Elf32_Sym * Sym = Donnees_ELF + Entete_Table_Symboles->sh_offset + i * sizeof (Elf32_Sym) ;
+		
+			ELF->Table_Symboles[i] = malloc (sizeof *Sym) ;
+			
+			if (ELF->Table_Symboles[i]) {
+				
+				memcpy (ELF->Table_Symboles[i], Sym, sizeof *Sym) ;
+				alloc = true ;
+		
+			}
+			
+			else alloc = false ;
 	
+		}
+		
 	}
 	
 	return alloc ;
 }
 
-void lire_Table_Chaines (donnees_ELF ELF, int ind_table, char ** Table, char * Donnees_ELF) {
+bool lire_Table_Chaines (donnees_ELF ELF, int ind_table, char ** Table, char * Donnees_ELF) {
 	
+	bool alloc = false ;
 	Elf32_Shdr *Entete_Table_Chaines = ELF->Entetes_Sections[ind_table] ;
 	
 	char *np = malloc (Entete_Table_Chaines->sh_size) ;
-	memcpy(np, Donnees_ELF + Entete_Table_Chaines->sh_offset, Entete_Table_Chaines->sh_size) ;
-  	*Table = np ;
+	
+	if (np) {
+		
+		memcpy(np, Donnees_ELF + Entete_Table_Chaines->sh_offset, Entete_Table_Chaines->sh_size) ;
+		*Table = np ;
+		alloc = true ;
+		
+	}
+	
+	return alloc ;
   	
 }
 
@@ -199,11 +227,11 @@ bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) {
 	
 			if (i == ELF->Entete_ELF->e_shstrndx)
 		
-				lire_Table_Chaines (ELF, i, &(ELF->Table_Chaines_ES), Donnees_ELF) ;
+				alloc = lire_Table_Chaines (ELF, i, &(ELF->Table_Chaines_ES), Donnees_ELF) ;
 	
 			else if (ELF->Entetes_Sections[i]->sh_type == SHT_STRTAB)
 		
-				lire_Table_Chaines (ELF, i, &(ELF->Table_Chaines), Donnees_ELF) ;
+				alloc = lire_Table_Chaines (ELF, i, &(ELF->Table_Chaines), Donnees_ELF) ;
 	
 			else if (ELF->Entetes_Sections[i]->sh_type == SHT_SYMTAB)
 		
@@ -216,9 +244,9 @@ bool lire_Entetes_Sections (donnees_ELF ELF, char * Donnees_ELF) {
 			else if (ELF->Entetes_Sections[i]->sh_type == SHT_PROGBITS)
 			
 				alloc = lire_Section_Progbits (ELF, i, &(ELF->Table_Progbits), Donnees_ELF) ;
-	 
+				
 			
-			lire_Section (ELF, i, Donnees_ELF) ;
+			alloc = lire_Section (ELF, i, Donnees_ELF) ;
 	
 		}
 		
@@ -254,7 +282,14 @@ void lecture_fichier_ELF (donnees_ELF *ELF, char ** Donnees_ELF, FILE *f, char *
 
 			(*ELF)->les = (*ELF)->Entete_ELF->e_shnum ;
 
-			if (!lire_Entetes_Sections (*ELF, *Donnees_ELF)) 
+			if (lire_Entetes_Sections (*ELF, *Donnees_ELF)) {
+				
+				free(*Donnees_ELF) ;
+				*Donnees_ELF = NULL ;
+				
+			}
+		
+			else
 				
 				printf("Erreur allocation mémoire : processus avorté.\n") ;
 	
